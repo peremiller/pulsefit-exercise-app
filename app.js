@@ -374,13 +374,17 @@ const openExercise = (exercise) => {
   $("#favoriteExercise").classList.toggle("is-saved", favorite);
   $("#favoriteExercise i").className = favorite ? "ph-fill ph-bookmark-simple" : "ph ph-bookmark-simple";
 
-  $("#exerciseDialog").showModal();
+  const dialog = $("#exerciseDialog");
+  dialog.showModal();
+  dialog.scrollTop = 0;
   document.body.style.overflow = "hidden";
 
   $("#playExerciseVideo").addEventListener("click", () => playVideo(exercise));
 };
 
 const playVideo = (exercise) => {
+  const dialog = $("#exerciseDialog");
+  const scrollPosition = dialog.scrollTop;
   $("#videoFrame").innerHTML = `
     <iframe
       src="https://www.youtube-nocookie.com/embed/${exercise.videoId}?autoplay=1&rel=0"
@@ -389,6 +393,10 @@ const playVideo = (exercise) => {
       referrerpolicy="strict-origin-when-cross-origin"
       allowfullscreen>
     </iframe>`;
+
+  const restoreDialogPosition = () => { dialog.scrollTop = scrollPosition; };
+  requestAnimationFrame(restoreDialogPosition);
+  $("#videoFrame iframe").addEventListener("load", restoreDialogPosition, { once: true });
 };
 
 const closeExercise = () => {
@@ -630,4 +638,3 @@ const init = () => {
 };
 
 init();
-
