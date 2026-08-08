@@ -79,6 +79,7 @@ const HOME_EXERCISES = [
     name: "Forearm Plank",
     level: "Beginner",
     focus: "Core",
+    style: "Isometric",
     equipment: "Exercise mat",
     image: "/assets/forearm-plank.webp",
     videoId: "A2b2EmIg0dA",
@@ -146,6 +147,84 @@ const HOME_EXERCISES = [
     prescription: "3 sets × 8 each",
     cues: ["Lower back stays grounded", "Move opposite limbs", "Exhale as you extend"],
   },
+  {
+    id: "low-squat-hold",
+    name: "Low Squat Hold",
+    level: "Beginner",
+    focus: "Lower body",
+    style: "Isometric",
+    equipment: "No equipment",
+    image: "/assets/bodyweight-squat.webp",
+    videoId: "P-yaD24bUE8",
+    duration: 30,
+    prescription: "3 holds × 20–30 sec",
+    cues: ["Sit hips back to a pain-free depth", "Keep chest tall", "Press knees gently outward"],
+  },
+  {
+    id: "push-up-hold",
+    name: "Push-up Hold",
+    level: "Intermediate",
+    focus: "Upper body",
+    style: "Isometric",
+    equipment: "No equipment",
+    image: "/assets/push-up.webp",
+    videoId: "7dXB7ZdOhf4",
+    duration: 20,
+    prescription: "3 holds × 10–20 sec",
+    cues: ["Pause at a strong pain-free depth", "Keep body in one line", "Breathe without dropping the hips"],
+  },
+  {
+    id: "glute-bridge-hold",
+    name: "Glute Bridge Hold",
+    level: "Beginner",
+    focus: "Lower body",
+    style: "Isometric",
+    equipment: "Exercise mat",
+    image: "/assets/glute-bridge.webp",
+    videoId: "OUgsJ8-Vi0E",
+    duration: 30,
+    prescription: "3 holds × 20–30 sec",
+    cues: ["Hold hips level", "Keep ribs down", "Squeeze glutes without arching the back"],
+  },
+  {
+    id: "bird-dog-hold",
+    name: "Bird Dog Hold",
+    level: "Beginner",
+    focus: "Core",
+    style: "Isometric",
+    equipment: "Exercise mat",
+    image: "/assets/bird-dog.webp",
+    videoId: "KA0ekfSePrQ",
+    duration: 20,
+    prescription: "3 holds × 15 sec each",
+    cues: ["Keep hips square to the floor", "Reach long through fingertips and heel", "Brace without holding your breath"],
+  },
+  {
+    id: "dead-bug-hold",
+    name: "Dead Bug Hold",
+    level: "Beginner",
+    focus: "Core",
+    style: "Isometric",
+    equipment: "Exercise mat",
+    image: "/assets/dead-bug.webp",
+    videoId: "g_BYB0R-4Ws",
+    duration: 20,
+    prescription: "3 holds × 15 sec each",
+    cues: ["Pin lower back gently to the mat", "Reach opposite arm and leg long", "Breathe slowly through the hold"],
+  },
+  {
+    id: "reverse-lunge-hold",
+    name: "Reverse Lunge Hold",
+    level: "Beginner",
+    focus: "Lower body",
+    style: "Isometric",
+    equipment: "No equipment",
+    image: "/assets/reverse-lunge.webp",
+    videoId: "u_zSfK5ZFU4",
+    duration: 20,
+    prescription: "3 holds × 15–20 sec each",
+    cues: ["Stack front knee over the ankle", "Keep torso tall", "Hold both hips facing forward"],
+  },
 ];
 
 const CHALLENGES = [
@@ -162,6 +241,13 @@ const CHALLENGES = [
     source: "NO EQUIPMENT",
     detail: "Squats, push-ups, lunges, glute work, and controlled core training.",
     exerciseIds: ["bodyweight-squat", "push-up", "reverse-lunge", "glute-bridge", "mountain-climber", "forearm-plank"],
+  },
+  {
+    id: "isometric30",
+    name: "Isometric Strength 30",
+    source: "CONTROLLED HOLDS",
+    detail: "Build full-body strength with low-impact timed holds and steady breathing.",
+    exerciseIds: ["low-squat-hold", "push-up-hold", "glute-bridge-hold", "forearm-plank", "bird-dog-hold", "dead-bug-hold", "reverse-lunge-hold"],
   },
   {
     id: "push30",
@@ -391,15 +477,15 @@ const exerciseCard = (exercise) => `
     <div class="exercise-body">
       <span>${exercise.focus}</span>
       <h3>${exercise.name}</h3>
-      <p>${exercise.level} · ${exercise.equipment}</p>
+      <p>${exercise.level} · ${exercise.style ? `${exercise.style} · ` : ""}${exercise.equipment}</p>
     </div>
   </article>`;
 
 const renderExercises = () => {
   const query = $("#exerciseSearch").value.trim().toLowerCase();
   const items = HOME_EXERCISES.filter((exercise) => {
-    const matchesFilter = state.filter === "All" || exercise.focus === state.filter;
-    const matchesQuery = !query || `${exercise.name} ${exercise.focus} ${exercise.cues.join(" ")}`.toLowerCase().includes(query);
+    const matchesFilter = state.filter === "All" || exercise.focus === state.filter || exercise.style === state.filter;
+    const matchesQuery = !query || `${exercise.name} ${exercise.focus} ${exercise.style || ""} ${exercise.cues.join(" ")}`.toLowerCase().includes(query);
     return matchesFilter && matchesQuery;
   });
 
@@ -430,7 +516,7 @@ const openExercise = (exercise) => {
   state.activeExercise = exercise;
   state.duration = exercise.duration;
   $("#detailTitle").textContent = exercise.name;
-  $("#detailMeta").textContent = `${exercise.level} · ${exercise.focus} · ${exercise.equipment}`;
+  $("#detailMeta").textContent = `${exercise.level} · ${exercise.focus}${exercise.style ? ` · ${exercise.style}` : ""} · ${exercise.equipment}`;
   $("#detailImage").src = exercise.image;
   $("#detailImage").alt = `${exercise.name} proper posture`;
   $("#cueOverlay").innerHTML = exercise.cues.map((cue) => `<span class="cue-pill">${cue}</span>`).join("");
