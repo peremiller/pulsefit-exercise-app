@@ -551,6 +551,54 @@ const goPage = (target, updateHistory = true) => {
 
 const pathToPage = () => location.pathname.split("/").filter(Boolean)[0] || "today";
 
+let deferredInstallPrompt = null;
+const isIosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandaloneApp = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+
+const updateInstallButton = () => {
+  const button = $("#installAppButton");
+  if (!button) return;
+  button.hidden = isStandaloneApp() || (!deferredInstallPrompt && !isIosDevice);
+};
+
+const installPulseFit = async () => {
+  if (deferredInstallPrompt) {
+    await deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    updateInstallButton();
+    showToast(outcome === "accepted" ? "PulseFit is being installed." : "Installation cancelled.");
+    return;
+  }
+
+  if (isIosDevice) showToast("On iPhone: tap Share, then Add to Home Screen.");
+};
+
+const enableInstallExperience = () => {
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    updateInstallButton();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    updateInstallButton();
+    showToast("PulseFit installed successfully.");
+  });
+
+  $("#installAppButton").addEventListener("click", installPulseFit);
+  updateInstallButton();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        showToast("Offline setup will retry next time.");
+      });
+    });
+  }
+};
+
 const bindEvents = () => {
   $$(".nav-item").forEach((item) => item.addEventListener("click", () => goPage(item.dataset.target)));
   window.addEventListener("popstate", () => goPage(pathToPage(), false));
@@ -635,6 +683,7 @@ const init = () => {
   renderBody();
   renderProgress();
   bindEvents();
+  enableInstallExperience();
   goPage(pathToPage(), false);
   saveState();
 };
