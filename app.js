@@ -149,9 +149,27 @@ const HOME_EXERCISES = [
 ];
 
 const CHALLENGES = [
-  { id: "abs30", name: "Six-Pack Abs 30", source: "CORE CONSISTENCY", detail: "Progressive crunches, leg raises, and plank holds." },
-  { id: "full30", name: "Full-Body 30", source: "NO EQUIPMENT", detail: "Squats, push-ups, lunges, and controlled core work." },
-  { id: "push30", name: "Push-Up Builder", source: "UPPER BODY", detail: "A steady progression from incline to full push-ups." },
+  {
+    id: "abs30",
+    name: "Six-Pack Abs 30",
+    source: "CORE CONSISTENCY",
+    detail: "Progressive planks, mountain climbers, dead bugs, and bird dogs.",
+    exerciseIds: ["forearm-plank", "mountain-climber", "dead-bug", "bird-dog"],
+  },
+  {
+    id: "full30",
+    name: "Full-Body 30",
+    source: "NO EQUIPMENT",
+    detail: "Squats, push-ups, lunges, glute work, and controlled core training.",
+    exerciseIds: ["bodyweight-squat", "push-up", "reverse-lunge", "glute-bridge", "mountain-climber", "forearm-plank"],
+  },
+  {
+    id: "push30",
+    name: "Push-Up Builder",
+    source: "UPPER BODY",
+    detail: "Push-up practice supported by planks, bird dogs, and shoulder stability.",
+    exerciseIds: ["push-up", "forearm-plank", "bird-dog", "dead-bug"],
+  },
 ];
 
 const safeRead = (key, fallback) => {
@@ -170,6 +188,7 @@ const state = {
   challenges: safeRead("pf_ch", {}),
   water: safeRead("pf_water", { d: "", ml: 0 }),
   favorites: safeRead("pf_favorites", []),
+  challengeSelection: {},
   activeExercise: HOME_EXERCISES[0],
   filter: "All",
   duration: 45,
@@ -279,27 +298,77 @@ const renderPlans = () => {
   });
 };
 
+const challengeExercisesForDay = (challenge, day) => {
+  const exerciseCount = day > 20 ? 3 : 2;
+  const offset = (day - 1) % challenge.exerciseIds.length;
+  return Array.from({ length: exerciseCount }, (_, index) => {
+    const exerciseId = challenge.exerciseIds[(offset + index) % challenge.exerciseIds.length];
+    return HOME_EXERCISES.find((exercise) => exercise.id === exerciseId);
+  }).filter(Boolean);
+};
+
+const challengeExerciseButton = (exercise) => `
+  <button class="challenge-exercise" type="button" data-challenge-exercise="${exercise.id}" aria-label="View ${exercise.name} proper posture and video">
+    <img src="${exercise.image}" alt="${exercise.name} proper posture" loading="lazy" />
+    <span class="challenge-exercise-copy">
+      <small><i class="ph ph-images"></i> POSTURE + VIDEO</small>
+      <strong>${exercise.name}</strong>
+      <span>${exercise.prescription}</span>
+    </span>
+    <span class="challenge-exercise-play" aria-hidden="true"><i class="ph-fill ph-play"></i></span>
+  </button>`;
+
 const renderChallenges = () => {
   $("#challengeGrid").innerHTML = CHALLENGES.map((challenge) => {
     const completed = state.challenges[challenge.id] || [];
+    const selectedDay = state.challengeSelection[challenge.id] || Array.from({ length: 30 }, (_, index) => index + 1).find((day) => !completed.includes(day)) || 30;
+    const selectedExercises = challengeExercisesForDay(challenge, selectedDay);
+    const selectedDayComplete = completed.includes(selectedDay);
     return `
       <article class="challenge-card">
         <span class="eyebrow">${challenge.source}</span>
         <h3>${challenge.name}</h3>
         <p>${completed.length}/30 days complete · ${challenge.detail}</p>
         <div class="progress-track"><span style="width:${(completed.length / 30) * 100}%"></span></div>
+        <section class="challenge-day-guide" aria-label="Day ${selectedDay} exercise guides">
+          <div class="challenge-guide-heading">
+            <div><span>DAY ${selectedDay}</span><strong>Posture & movement guides</strong></div>
+            <small>Tap an exercise to learn proper form and watch its video.</small>
+          </div>
+          <div class="challenge-exercise-list">
+            ${selectedExercises.map(challengeExerciseButton).join("")}
+          </div>
+          <button class="challenge-complete ${selectedDayComplete ? "is-complete" : ""}" type="button" data-challenge-complete="${challenge.id}" data-day="${selectedDay}">
+            <i class="ph ${selectedDayComplete ? "ph-arrow-counter-clockwise" : "ph-check-circle"}"></i>
+            ${selectedDayComplete ? `Mark day ${selectedDay} incomplete` : `Complete day ${selectedDay}`}
+          </button>
+        </section>
         <div class="challenge-days">
           ${Array.from({ length: 30 }, (_, index) => {
             const day = index + 1;
-            return `<button type="button" class="${completed.includes(day) ? "is-done" : ""}" data-challenge="${challenge.id}" data-day="${day}" aria-label="Toggle day ${day}">${day}</button>`;
+            const classes = [completed.includes(day) ? "is-done" : "", selectedDay === day ? "is-selected" : ""].filter(Boolean).join(" ");
+            return `<button type="button" class="${classes}" data-challenge-day="${challenge.id}" data-day="${day}" aria-label="View day ${day} exercises" aria-pressed="${selectedDay === day}">${day}</button>`;
           }).join("")}
         </div>
       </article>`;
   }).join("");
 
-  $$("[data-challenge]").forEach((button) => {
+  $$("[data-challenge-day]").forEach((button) => {
     button.addEventListener("click", () => {
-      const { challenge, day } = button.dataset;
+      state.challengeSelection[button.dataset.challengeDay] = Number(button.dataset.day);
+      renderChallenges();
+    });
+  });
+
+  $$("[data-challenge-exercise]").forEach((button) => {
+    button.addEventListener("click", () => {
+      openExercise(HOME_EXERCISES.find((exercise) => exercise.id === button.dataset.challengeExercise));
+    });
+  });
+
+  $$("[data-challenge-complete]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const { challengeComplete: challenge, day } = button.dataset;
       const value = Number(day);
       const completed = state.challenges[challenge] || [];
       const index = completed.indexOf(value);
@@ -308,6 +377,7 @@ const renderChallenges = () => {
       saveState();
       renderChallenges();
       renderBadges();
+      showToast(index >= 0 ? `Day ${value} marked incomplete.` : `Day ${value} complete — strong work.`);
     });
   });
 };
