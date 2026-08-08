@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#071728" />
+  <meta name="description" content="PulseFit brings guided home exercise, planning, cardio, body tracking, and progress into one calm training space." />
+  <title>PulseFit — Move with confidence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-lockup" aria-label="PulseFit home">
+        <span class="brand-mark"><i class="ph ph-heartbeat"></i></span>
+        <div>
+          <strong>PulseFit</strong>
+          <span>Move with confidence</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-button" type="button" aria-label="Open notifications"><i class="ph ph-bell"></i></button>
+        <button class="avatar-button" type="button" aria-label="Open profile">AJ</button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="app-page is-active" id="today" data-page="today">
+        <div class="page-heading today-heading">
+          <div>
+            <span class="eyebrow" id="todayDate"></span>
+            <h1 id="greeting">Good morning, AJ</h1>
+            <p>Your next move is ready when you are.</p>
+          </div>
+          <button class="primary-button compact" type="button" id="startTodayButton">
+            <i class="ph ph-play"></i><span>Start workout</span>
+          </button>
+        </div>
+
+        <section class="today-hero">
+          <div class="hero-copy">
+            <span class="hero-kicker">UP NEXT · DAY 1</span>
+            <h2>Upper body strength</h2>
+            <p>A focused 42-minute session built around five controlled movements.</p>
+            <button class="light-button" type="button" id="viewSessionButton">View today’s session <i class="ph ph-arrow-right"></i></button>
+          </div>
+          <div class="hero-progress">
+            <span>Weekly goal</span>
+            <strong id="weeklyProgress">0/4</strong>
+            <div class="progress-track" aria-label="Weekly training goal"><span id="weeklyBar"></span></div>
+          </div>
+        </section>
+
+        <div class="metrics-strip" aria-label="Training summary">
+          <article><span>Workouts</span><strong id="statWorkouts">0</strong></article>
+          <article><span>Minutes</span><strong id="statMinutes">0</strong></article>
+          <article><span>Volume</span><strong id="statVolume">0 kg</strong></article>
+          <article><span>Training days</span><strong id="statDays">0</strong></article>
+        </div>
+
+        <div class="home-layout">
+          <section class="surface hydration-card">
+            <div class="section-label"><i class="ph ph-drop"></i> Hydration</div>
+            <div class="card-title-row"><h2 id="waterNow">0 ml</h2><span>Goal 2,000 ml</span></div>
+            <div class="progress-track"><span id="waterBar"></span></div>
+            <div class="button-pair">
+              <button class="soft-button" type="button" data-water="250">+250 ml</button>
+              <button class="soft-button" type="button" data-water="500">+500 ml</button>
+            </div>
+          </section>
+
+          <section class="surface next-session-card">
+            <div class="card-title-row">
+              <div>
+                <span class="section-label">TODAY’S SESSION</span>
+                <h2>Upper A</h2>
+              </div>
+              <span class="session-time"><i class="ph ph-clock"></i> 42 min</span>
+            </div>
+            <div id="todaySessionList" class="session-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="app-page" id="plan" data-page="plan">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">YOUR TRAINING RHYTHM</span>
+            <h1>Plan</h1>
+            <p>Structured sessions and steady 30-day challenges.</p>
+          </div>
+        </div>
+        <div class="plan-layout">
+          <section>
+            <div class="section-heading"><div><span class="eyebrow">WEEKLY SPLIT</span><h2>Training plan</h2></div></div>
+            <div id="planGrid" class="plan-grid"></div>
+          </section>
+          <section>
+            <div class="section-heading"><div><span class="eyebrow">BUILD CONSISTENCY</span><h2>Home challenges</h2></div></div>
+            <div id="challengeGrid" class="challenge-grid"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="app-page" id="cardio" data-page="cardio">
+        <div class="page-heading">
+          <div><span class="eyebrow">PACE WITH PURPOSE</span><h1>Cardio</h1><p>Log a run, walk, or ride and watch the week add up.</p></div>
+        </div>
+        <div class="split-layout">
+          <section class="surface form-surface">
+            <span class="section-label">LOG ACTIVITY</span>
+            <h2>New cardio session</h2>
+            <form id="cardioForm" class="field-grid">
+              <label><span>Activity</span><select id="cardioType"><option>Run</option><option>Walk</option><option>Ride</option></select></label>
+              <label><span>Distance (km)</span><input id="cardioKm" type="number" min="0.1" step="0.1" placeholder="5.0" required /></label>
+              <label><span>Minutes</span><input id="cardioMinutes" type="number" min="1" placeholder="30" required /></label>
+              <button class="primary-button" type="submit"><i class="ph ph-plus"></i> Save activity</button>
+            </form>
+          </section>
+          <section class="surface">
+            <span class="section-label">THIS WEEK</span>
+            <div class="large-stat" id="cardioWeekKm">0.0 km</div>
+            <p class="muted" id="cardioWeekSummary">No activities logged yet.</p>
+            <div id="cardioFeed" class="history-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="app-page" id="body" data-page="body">
+        <div class="page-heading">
+          <div><span class="eyebrow">MEASURE THE TREND</span><h1>Body</h1><p>Simple tracking for the signals that matter to you.</p></div>
+        </div>
+        <div class="split-layout">
+          <section class="surface form-surface">
+            <span class="section-label">LOG MEASUREMENT</span>
+            <h2>Body check-in</h2>
+            <form id="bodyForm" class="field-grid">
+              <label><span>Weight (kg)</span><input id="bodyWeight" type="number" min="1" step="0.1" placeholder="70.0" required /></label>
+              <label><span>Body fat (%)</span><input id="bodyFat" type="number" min="1" step="0.1" placeholder="Optional" /></label>
+              <label><span>Waist (cm)</span><input id="bodyWaist" type="number" min="1" step="0.1" placeholder="Optional" /></label>
+              <label><span>Height (cm)</span><input id="bodyHeight" type="number" min="80" step="0.1" placeholder="Optional" /></label>
+              <button class="primary-button" type="submit"><i class="ph ph-plus"></i> Save measurement</button>
+            </form>
+          </section>
+          <section class="surface">
+            <span class="section-label">CURRENT</span>
+            <div class="large-stat" id="bodyNow">—</div>
+            <p class="muted" id="bmiText">Log a weight to see your latest reading.</p>
+            <div id="bodyFeed" class="history-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="app-page" id="library" data-page="library">
+        <div class="page-heading library-heading">
+          <div><span class="eyebrow">FORM STUDIO</span><h1>Exercise library</h1><p>Learn the movement before you count the reps.</p></div>
+          <label class="search-field"><i class="ph ph-magnifying-glass"></i><input id="exerciseSearch" type="search" placeholder="Search home exercises" /></label>
+        </div>
+        <div class="filter-bar" id="exerciseFilters" aria-label="Filter exercises">
+          <button class="filter-chip is-active" type="button" data-filter="All">All</button>
+          <button class="filter-chip" type="button" data-filter="Lower body">Lower body</button>
+          <button class="filter-chip" type="button" data-filter="Upper body">Upper body</button>
+          <button class="filter-chip" type="button" data-filter="Core">Core</button>
+        </div>
+        <div class="library-intro">
+          <div><span class="eyebrow">HOME EXERCISES</span><h2>Posture and movement, together</h2></div>
+          <p>Every exercise includes a clear proper-form picture, coaching cues, and a playable video demonstration.</p>
+        </div>
+        <div id="homeExerciseGrid" class="exercise-grid"></div>
+      </section>
+
+      <section class="app-page" id="progress" data-page="progress">
+        <div class="page-heading">
+          <div><span class="eyebrow">CONSISTENCY COMPOUNDS</span><h1>Progress</h1><p>Your completed sessions and milestones in one place.</p></div>
+        </div>
+        <div class="split-layout">
+          <section class="surface">
+            <div class="card-title-row"><div><span class="section-label">TRAINING HISTORY</span><h2>Recent workouts</h2></div></div>
+            <div id="workoutHistory" class="history-list"></div>
+          </section>
+          <section class="surface">
+            <span class="section-label">MILESTONES</span>
+            <h2>Quiet wins</h2>
+            <div id="badgeGrid" class="badge-grid"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button class="nav-item is-active" type="button" data-target="today"><i class="ph ph-sun"></i><span>Today</span></button>
+      <button class="nav-item" type="button" data-target="plan"><i class="ph ph-clipboard-text"></i><span>Plan</span></button>
+      <button class="nav-item" type="button" data-target="cardio"><i class="ph ph-person-simple-run"></i><span>Cardio</span></button>
+      <button class="nav-item" type="button" data-target="body"><i class="ph ph-barbell"></i><span>Body</span></button>
+      <button class="nav-item" type="button" data-target="library"><i class="ph ph-books"></i><span>Library</span></button>
+      <button class="nav-item" type="button" data-target="progress"><i class="ph ph-chart-line-up"></i><span>Progress</span></button>
+    </nav>
+  </div>
+
+  <dialog class="exercise-dialog" id="exerciseDialog">
+    <div class="exercise-detail">
+      <header class="detail-header">
+        <button class="detail-icon-button" type="button" id="closeExercise" aria-label="Close exercise"><i class="ph ph-arrow-left"></i></button>
+        <span>Home exercise</span>
+        <button class="detail-icon-button" type="button" id="favoriteExercise" aria-label="Save exercise"><i class="ph ph-bookmark-simple"></i></button>
+      </header>
+      <div class="detail-content">
+        <div class="detail-heading">
+          <h1 id="detailTitle">Bodyweight Squat</h1>
+          <p id="detailMeta">Beginner · Lower body · No equipment</p>
+        </div>
+        <div class="media-compare">
+          <section class="posture-panel">
+            <div class="media-heading"><i class="ph ph-check-circle"></i><span>Proper posture</span></div>
+            <div class="media-frame posture-frame">
+              <img id="detailImage" src="" alt="" />
+              <div class="cue-overlay" id="cueOverlay"></div>
+            </div>
+          </section>
+          <section class="video-panel">
+            <div class="media-heading"><i class="ph ph-video-camera"></i><span>Movement demo</span></div>
+            <div class="media-frame video-frame" id="videoFrame"></div>
+          </section>
+        </div>
+        <div class="coaching-grid">
+          <section>
+            <h2>Form checklist</h2>
+            <ul id="formChecklist"></ul>
+          </section>
+          <section class="prescription">
+            <span class="prescription-icon"><i class="ph ph-barbell"></i></span>
+            <div><span>Prescription</span><strong id="prescriptionText">3 sets × 12 reps</strong></div>
+          </section>
+        </div>
+        <div class="duration-row">
+          <span><i class="ph ph-clock"></i> Duration</span>
+          <div class="stepper">
+            <button type="button" id="durationDown" aria-label="Decrease duration"><i class="ph ph-minus"></i></button>
+            <strong><span id="durationValue">45</span> sec</strong>
+            <button type="button" id="durationUp" aria-label="Increase duration"><i class="ph ph-plus"></i></button>
+          </div>
+        </div>
+        <button class="primary-button detail-start" type="button" id="startGuidedSet"><i class="ph ph-arrow-right"></i> Start guided set</button>
+        <p class="movement-progress"><i class="ph ph-check-circle"></i> Today · <span id="movementCount">1</span> of 4 movements</p>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="guided-dialog" id="guidedDialog">
+    <div class="guided-session">
+      <div class="guided-top">
+        <button class="detail-icon-button" type="button" id="closeGuided" aria-label="Close guided set"><i class="ph ph-x"></i></button>
+        <span>GUIDED SET</span>
+        <span id="guidedRound">Round 1 of 3</span>
+      </div>
+      <div class="guided-body">
+        <img id="guidedImage" src="" alt="" />
+        <span class="guided-kicker" id="guidedExerciseName"></span>
+        <div class="timer-ring"><strong id="guidedTimer">45</strong><span>seconds</span></div>
+        <p id="guidedCue">Keep your posture steady and breathe.</p>
+        <button class="primary-button" type="button" id="guidedToggle"><i class="ph ph-pause"></i> Pause</button>
+        <button class="text-button" type="button" id="completeGuided">Complete set</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
