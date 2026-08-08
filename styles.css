@@ -783,6 +783,8 @@ p { margin-top: 0; }
 .exercise-dialog::backdrop,
 .guided-dialog::backdrop { background: rgba(7, 23, 40, 0.7); }
 
+.exercise-dialog { overflow-anchor: none; }
+
 .exercise-detail { min-height: 100%; background: var(--mist); }
 
 .detail-header {
