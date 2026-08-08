@@ -399,11 +399,6 @@ const playVideo = (exercise) => {
   const restoreDialogPosition = () => { dialog.scrollTop = scrollPosition; };
   requestAnimationFrame(restoreDialogPosition);
   videoFrame.querySelector("iframe").addEventListener("load", restoreDialogPosition, { once: true });
-  const scrollGuard = window.setInterval(restoreDialogPosition, 100);
-  window.setTimeout(() => {
-    window.clearInterval(scrollGuard);
-    restoreDialogPosition();
-  }, 1600);
 };
 
 const closeExercise = () => {
