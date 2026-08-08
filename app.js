@@ -385,18 +385,20 @@ const openExercise = (exercise) => {
 const playVideo = (exercise) => {
   const dialog = $("#exerciseDialog");
   const scrollPosition = dialog.scrollTop;
-  $("#videoFrame").innerHTML = `
+  const videoFrame = $("#videoFrame");
+  videoFrame.insertAdjacentHTML("beforeend", `
     <iframe
+      style="z-index: 4"
       src="https://www.youtube-nocookie.com/embed/${exercise.videoId}?autoplay=1&rel=0"
       title="${exercise.name} proper form video"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       referrerpolicy="strict-origin-when-cross-origin"
       allowfullscreen>
-    </iframe>`;
+    </iframe>`);
 
   const restoreDialogPosition = () => { dialog.scrollTop = scrollPosition; };
   requestAnimationFrame(restoreDialogPosition);
-  $("#videoFrame iframe").addEventListener("load", restoreDialogPosition, { once: true });
+  videoFrame.querySelector("iframe").addEventListener("load", restoreDialogPosition, { once: true });
 };
 
 const closeExercise = () => {
