@@ -1,3 +1,5 @@
+import { importBodyCardExercises, bodyCardExercise, BODY_CARD_WORKOUTS, BODY_CARD_SOURCE } from './body-card-import.js';
+
 const PLANS = [
   {
     name: "Upper A",
@@ -49,7 +51,7 @@ const PLANS = [
   },
 ];
 
-const HOME_EXERCISES = [
+const HOME_EXERCISES = importBodyCardExercises([
   {
     id: "bodyweight-squat",
     name: "Bodyweight Squat",
@@ -225,7 +227,7 @@ const HOME_EXERCISES = [
     prescription: "3 holds × 15–20 sec each",
     cues: ["Stack front knee over the ankle", "Keep torso tall", "Hold both hips facing forward"],
   },
-];
+]);
 
 const CHALLENGES = [
   {
@@ -384,6 +386,20 @@ const renderPlans = () => {
   });
 };
 
+const renderBodyCardPlans = () => {
+  $("#bodyCardPlanGrid").innerHTML = Object.entries(BODY_CARD_WORKOUTS).map(([id, workout]) => `
+    <article class="plan-card body-card-plan">
+      <span class="eyebrow">BODY CARD · ${workout.duration} MIN, FLEXIBLE</span>
+      <h3>${workout.name}</h3><p>${workout.focus}</p>
+      <ul class="body-card-movements">${workout.exercises.map(([name, dose], index) => `
+        <li><button type="button" data-body-card-exercise="${id}:${index}"><span>${name}</span><strong>${dose}</strong></button></li>`).join("")}</ul>
+    </article>`).join("");
+  $$("[data-body-card-exercise]").forEach((button) => button.addEventListener("click", () => {
+    const [id, index] = button.dataset.bodyCardExercise.split(":");
+    openExercise(bodyCardExercise(HOME_EXERCISES, id, Number(index)));
+  }));
+};
+
 const challengeExercisesForDay = (challenge, day) => {
   const exerciseCount = day > 20 ? 3 : 2;
   const offset = (day - 1) % challenge.exerciseIds.length;
@@ -395,7 +411,7 @@ const challengeExercisesForDay = (challenge, day) => {
 
 const challengeExerciseButton = (exercise) => `
   <button class="challenge-exercise" type="button" data-challenge-exercise="${exercise.id}" aria-label="View ${exercise.name} proper posture and video">
-    <img src="${exercise.image}" alt="${exercise.name} proper posture" loading="lazy" />
+    <img src="${exercise.image}" alt="${exercise.guideOnly ? "Body Card movement guide" : `${exercise.name} proper posture`}" loading="lazy" />
     <span class="challenge-exercise-copy">
       <small><i class="ph ph-images"></i> POSTURE + VIDEO</small>
       <strong>${exercise.name}</strong>
@@ -471,12 +487,13 @@ const renderChallenges = () => {
 const exerciseCard = (exercise) => `
   <article class="exercise-card" tabindex="0" role="button" data-exercise="${exercise.id}" aria-label="Open ${exercise.name} form guide">
     <div class="exercise-image">
-      <img src="${exercise.image}" alt="${exercise.name} proper posture" loading="lazy" />
-      <span class="exercise-media-badge"><i class="ph ph-images"></i> PHOTO + VIDEO</span>
+      <img src="${exercise.image}" alt="${exercise.guideOnly ? "Body Card movement guide" : `${exercise.name} proper posture`}" loading="lazy" />
+      <span class="exercise-media-badge"><i class="ph ${exercise.guideOnly ? "ph-book-open" : "ph-images"}"></i> ${exercise.guideOnly ? "MOVEMENT GUIDE" : "PHOTO + VIDEO"}</span>
     </div>
     <div class="exercise-body">
       <span>${exercise.focus}</span>
       <h3>${exercise.name}</h3>
+      ${exercise.bodyCard ? `<small class="body-card-tag">Body Card · ${exercise.bodyCardRecords[0].prescription}</small>` : ""}
       <p>${exercise.level} · ${exercise.style ? `${exercise.style} · ` : ""}${exercise.equipment}</p>
     </div>
   </article>`;
@@ -484,8 +501,8 @@ const exerciseCard = (exercise) => `
 const renderExercises = () => {
   const query = $("#exerciseSearch").value.trim().toLowerCase();
   const items = HOME_EXERCISES.filter((exercise) => {
-    const matchesFilter = state.filter === "All" || exercise.focus === state.filter || exercise.style === state.filter;
-    const matchesQuery = !query || `${exercise.name} ${exercise.focus} ${exercise.style || ""} ${exercise.cues.join(" ")}`.toLowerCase().includes(query);
+    const matchesFilter = state.filter === "All" || exercise.focus === state.filter || exercise.style === state.filter || (state.filter === "Body Card" && exercise.bodyCard);
+    const matchesQuery = !query || `${exercise.name} ${exercise.focus} ${exercise.style || ""} ${exercise.equipment} ${exercise.bodyCard ? "Body Card" : ""} ${exercise.cues.join(" ")}`.toLowerCase().includes(query);
     return matchesFilter && matchesQuery;
   });
 
@@ -494,7 +511,15 @@ const renderExercises = () => {
     : '<div class="empty-state">No home exercises match that search.</div>';
 
   $$("[data-exercise]").forEach((card) => {
-    const activate = () => openExercise(HOME_EXERCISES.find((exercise) => exercise.id === card.dataset.exercise));
+    const activate = () => {
+      let exercise = HOME_EXERCISES.find((item) => item.id === card.dataset.exercise);
+      if (state.filter === "Body Card") {
+        const record = exercise.bodyCardRecords[0];
+        const index = BODY_CARD_WORKOUTS[record.workoutId].exercises.findIndex(([name]) => name === record.name);
+        exercise = bodyCardExercise(HOME_EXERCISES, record.workoutId, index);
+      }
+      openExercise(exercise);
+    };
     card.addEventListener("click", activate);
     card.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
@@ -524,7 +549,15 @@ const openExercise = (exercise) => {
   $("#prescriptionText").textContent = exercise.prescription;
   $("#durationValue").textContent = state.duration;
   $("#movementCount").textContent = Math.min(4, state.completedMovements + 1);
-  $("#videoFrame").innerHTML = videoPreview(exercise);
+  $("#exerciseDialog .posture-panel").hidden = !!exercise.guideOnly;
+  $("#exerciseDialog .media-compare").classList.toggle("guide-only", !!exercise.guideOnly);
+  $("#exerciseDialog .video-panel .media-heading span").textContent = exercise.guideOnly ? "Movement notes" : "Movement demo";
+  $("#videoFrame").classList.toggle("movement-notes", !!exercise.guideOnly);
+  $("#videoFrame").innerHTML = exercise.guideOnly
+    ? `<div><span class="eyebrow">BODY CARD</span><h2>${exercise.name}</h2><p>${exercise.cues.join(" ")}</p><p><strong>Equipment:</strong> ${exercise.equipment}</p></div>`
+    : videoPreview(exercise);
+  $("#bodyCardSource").hidden = !exercise.bodyCard;
+  $("#bodyCardSource").innerHTML = exercise.bodyCard ? `<a href="${BODY_CARD_SOURCE}" target="_blank" rel="noopener noreferrer">From Body Card training ↗</a>${exercise.bodyCardWorkout ? `<p>Current routine: ${exercise.bodyCardWorkout}</p>` : ""}<ul>${exercise.bodyCardRecords.map((record) => `<li><strong>${record.workoutName} · ${record.prescription}</strong><br>${record.cue}</li>`).join("")}</ul>` : "";
 
   const favorite = state.favorites.includes(exercise.id);
   $("#favoriteExercise").classList.toggle("is-saved", favorite);
@@ -535,7 +568,7 @@ const openExercise = (exercise) => {
   dialog.scrollTop = 0;
   document.body.style.overflow = "hidden";
 
-  $("#playExerciseVideo").addEventListener("click", () => playVideo(exercise));
+  $("#playExerciseVideo")?.addEventListener("click", () => playVideo(exercise));
 };
 
 const playVideo = (exercise) => {
@@ -576,7 +609,7 @@ const toggleFavorite = () => {
 };
 
 const updateDuration = (delta) => {
-  state.duration = Math.max(15, Math.min(180, state.duration + delta));
+  state.duration = Math.max(15, Math.min(state.activeExercise?.guideOnly ? 1800 : 180, state.duration + delta));
   $("#durationValue").textContent = state.duration;
 };
 
@@ -833,6 +866,7 @@ const init = () => {
   renderStats();
   renderWater();
   renderPlans();
+  renderBodyCardPlans();
   renderChallenges();
   renderExercises();
   renderCardio();

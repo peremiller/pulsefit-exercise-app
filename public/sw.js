@@ -1,4 +1,4 @@
-const CACHE_VERSION = "pulsefit-v3";
+const CACHE_VERSION = "pulsefit-v4-body-card";
 const APP_SHELL = [
   "/",
   "/icons/pulsefit-logo.svg",
