@@ -1,3 +1,4 @@
+import { gymDirectoryMarkup, mountGymDirectory } from './gym-recommendations.js';
 import { importBodyCardExercises, bodyCardExercise, BODY_CARD_WORKOUTS, BODY_CARD_SOURCE } from './body-card-import.js';
 
 const PLANS = [
@@ -730,7 +731,7 @@ const renderBadges = () => {
 };
 
 const goPage = (target, updateHistory = true) => {
-  const valid = ["today", "plan", "cardio", "body", "library", "progress"].includes(target) ? target : "today";
+  const valid = ["today", "plan", "cardio", "body", "library", "progress", "gyms"].includes(target) ? target : "today";
   $$(".app-page").forEach((page) => page.classList.toggle("is-active", page.dataset.page === valid));
   $$(".nav-item").forEach((item) => item.classList.toggle("is-active", item.dataset.target === valid));
   if (updateHistory) history.pushState({ page: valid }, "", valid === "today" ? "/" : `/${valid}`);
@@ -872,6 +873,8 @@ const init = () => {
   renderCardio();
   renderBody();
   renderProgress();
+  $("#gymDirectory").innerHTML = gymDirectoryMarkup();
+  mountGymDirectory($("#gymDirectory"));
   bindEvents();
   enableInstallExperience();
   goPage(pathToPage(), false);

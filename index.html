@@ -21,6 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css" />
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/gym-recommendations.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -102,7 +103,7 @@
           <div>
             <span class="eyebrow">YOUR TRAINING RHYTHM</span>
             <h1>Plan</h1>
-            <p>Structured sessions and steady 30-day challenges.</p>
+            <p>Structured sessions and steady 30-day challenges. <a href="/gyms">Find a recommended gym ↗</a></p>
           </div>
         </div>
         <div class="plan-layout">
@@ -210,6 +211,7 @@
           </section>
         </div>
       </section>
+      <section class="app-page" id="gyms" data-page="gyms"><div class="page-heading"><div><span class="eyebrow">MAKE TRAINING CONVENIENT</span><h1>Recommended gyms</h1><p>Choose a place that fits your routine and your usual bases.</p></div></div><div id="gymDirectory"></div></section>
     </main>
 
     <nav class="bottom-nav" aria-label="Primary navigation">
@@ -218,6 +220,7 @@
       <button class="nav-item" type="button" data-target="cardio"><i class="ph ph-person-simple-run"></i><span>Cardio</span></button>
       <button class="nav-item" type="button" data-target="body"><i class="ph ph-barbell"></i><span>Body</span></button>
       <button class="nav-item" type="button" data-target="library"><i class="ph ph-books"></i><span>Library</span></button>
+      <button class="nav-item" type="button" data-target="gyms"><i class="ph ph-map-pin"></i><span>Gyms</span></button>
       <button class="nav-item" type="button" data-target="progress"><i class="ph ph-chart-line-up"></i><span>Progress</span></button>
     </nav>
   </div>

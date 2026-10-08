@@ -871,7 +871,7 @@ p { margin-top: 0; }
   z-index: 30;
   display: grid;
   width: min(880px, calc(100% - 24px));
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   margin: 0 auto;
   padding: 8px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1402,7 +1402,7 @@ p { margin-top: 0; }
   .exercise-grid { grid-template-columns: 1fr 1fr; }
   .field-grid { grid-template-columns: 1fr; }
   .field-grid .primary-button { grid-column: auto; }
-  .challenge-days { grid-template-columns: repeat(6, 1fr); }
+  .challenge-days { grid-template-columns: repeat(7, 1fr); }
   .challenge-day-guide { padding: 12px; }
   .challenge-guide-heading { display: grid; gap: 5px; }
   .challenge-guide-heading small { max-width: none; text-align: left; }
