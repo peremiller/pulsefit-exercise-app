@@ -363,7 +363,7 @@
       if (!event.data.meals || typeof event.data.meals !== 'object' || Array.isArray(event.data.meals)) return;
       const incoming = {};
       for (const [date, entry] of Object.entries(event.data.meals)) {
-        if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !entry || typeof entry !== 'object') continue;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !entry || typeof entry !== 'object') continue;
         incoming[date] = {};
         for (const [id] of types) if (typeof entry[id] === 'string') incoming[date][id] = entry[id].slice(0,400);
       }
@@ -383,7 +383,7 @@
             !payload.meals || typeof payload.meals !== 'object' || Array.isArray(payload.meals)) throw Error('Incorrect meal-plan file');
         const imported = {};
         for (const [date, entry] of Object.entries(payload.meals)) {
-          if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !entry || typeof entry !== 'object') continue;
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !entry || typeof entry !== 'object') continue;
           imported[date] = {};
           for (const [id] of types) if (typeof entry[id] === 'string') imported[date][id] = entry[id].slice(0,400);
         }
