@@ -101,14 +101,19 @@
             <div>
               <span class="section-label"><i class="ph ph-calendar-check"></i> DAILY EXERCISE + MEAL PLANNER</span>
               <h2 id="dailyMealsTitle">Today's workouts &amp; meals</h2>
-              <p class="muted" style="margin:8px 0 0">Your PulseFit session is shown above. Review your scheduled breakfast, lunch, dinner and snacks from Healthy Recipes below.</p>
+              <p class="muted" style="margin:8px 0 0">Your PulseFit session is shown above. Add meals alongside your workouts below, or open the original Healthy Recipes meal planner.</p>
             </div>
             <a class="soft-button" href="https://healthy-recipes-murex.vercel.app/planner" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px">Open full meal planner <i class="ph ph-arrow-square-out"></i></a>
           </div>
-          <div style="margin-top:18px;border:1px solid rgba(120,150,170,.22);border-radius:16px;overflow:hidden;background:#fff">
-            <iframe title="Healthy Recipes daily meal planner" src="https://healthy-recipes-murex.vercel.app/planner" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" style="display:block;width:100%;height:min(75vh,750px);min-height:470px;border:0;background:#fff"></iframe>
+          <div style="margin-top:18px;padding:20px;border:1px solid rgba(120,150,170,.24);border-radius:16px;background:#f6fafb">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+              <label for="pulseMealDate" style="font-weight:700">Meals for <input id="pulseMealDate" type="date" style="margin-left:8px;padding:8px;border:1px solid #ccd9de;border-radius:8px" /></label>
+              <a href="https://healthy-recipes-murex.vercel.app/planner" target="_blank" rel="noopener noreferrer">View your original meal plan ↗</a>
+            </div>
+            <p class="muted" style="margin:12px 0">The Healthy Recipes website cannot be embedded here. You can keep a daily meal checklist in PulseFit below; entries saved here stay in this browser and do not automatically sync with Healthy Recipes.</p>
+            <div id="pulseMealFields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div>
+            <p id="pulseMealSaved" role="status" aria-live="polite" class="muted" style="font-size:12px;margin:12px 0 0">Meal entries are saved automatically on this device.</p>
           </div>
-          <p class="muted" style="font-size:13px;margin-top:12px">Meal plans stay managed in Healthy Recipes. If its embedded view is restricted by the source app, use “Open full meal planner” above.</p>
         </section>
       </section>
 
@@ -308,6 +313,43 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+  (() => {
+    const dateInput = document.getElementById('pulseMealDate');
+    const fields = document.getElementById('pulseMealFields');
+    if (!dateInput || !fields) return;
+    const types = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+    const today = new Date();
+    const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    dateInput.value = localToday;
+    const key = () => 'pulsefit-meals-v1:' + dateInput.value;
+    function render() {
+      let saved = {};
+      try { saved = JSON.parse(localStorage.getItem(key()) || '{}') || {}; } catch (_) {}
+      fields.replaceChildren();
+      for (const type of types) {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:grid;gap:7px;font-weight:650;font-size:13px';
+        const caption = document.createElement('span'); caption.textContent = type;
+        const input = document.createElement('textarea');
+        input.rows = 2; input.placeholder = 'Add ' + type.toLowerCase() + '…';
+        input.value = saved[type] || '';
+        input.setAttribute('aria-label', type + ' for ' + dateInput.value);
+        input.style.cssText = 'width:100%;box-sizing:border-box;resize:vertical;border:1px solid #d3dce3;border-radius:10px;padding:11px;font:inherit;background:white;color:#142a37';
+        input.addEventListener('input', () => {
+          let entry = {};
+          try { entry = JSON.parse(localStorage.getItem(key()) || '{}') || {}; } catch (_) {}
+          entry[type] = input.value;
+          try { localStorage.setItem(key(), JSON.stringify(entry)); document.getElementById('pulseMealSaved').textContent = 'Saved on this device.'; }
+          catch (_) { document.getElementById('pulseMealSaved').textContent = 'Unable to save: browser storage is unavailable.'; }
+        });
+        label.append(caption, input); fields.append(label);
+      }
+    }
+    dateInput.addEventListener('change', render);
+    render();
+  })();
+  </script>
   <script type="module" src="/app.js"></script>
 </body>
 </html>
