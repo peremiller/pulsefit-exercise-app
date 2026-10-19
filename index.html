@@ -112,6 +112,9 @@
             </div>
             <p class="muted" style="margin:12px 0">Pull your planned meals directly from Healthy Recipes. Choose “Import meals” to open a secure source window and transfer your existing meal schedule. No retyping needed.</p>
             <button class="primary-button compact" id="pulseImportMeals" type="button" style="margin:10px 0 16px">Import meals from Healthy Recipes ↗</button>
+            <label for="pulseMealFile" style="display:inline-flex;align-items:center;gap:8px;margin:10px 0 16px 12px;padding:10px 15px;border:1px solid #adc3cc;border-radius:10px;font-weight:700;cursor:pointer;background:white"> <i class="ph ph-upload-simple"></i> Upload Healthy Recipes meal file</label>
+            <input id="pulseMealFile" type="file" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0" aria-label="Upload meal plan JSON exported from Healthy Recipes" />
+            <p class="muted">If the direct import doesn't connect: in Healthy Recipes select <strong>Export meals to PulseFit</strong>, then upload that JSON file here. This transfers the real planned meals without retyping.</p>
             <div id="pulseMealFields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div>
             <p id="pulseMealSaved" role="status" aria-live="polite" class="muted" style="font-size:12px;margin:12px 0 0">Meal plans are read-only copies from Healthy Recipes. Import again to get the latest changes.</p>
           </div>
@@ -369,6 +372,27 @@
       feedback.textContent = 'Imported meals for ' + Object.keys(meals).length + ' planned dates. Import again whenever you update Healthy Recipes.';
       render();
       popup.close();popup=null;
+    });
+    document.getElementById('pulseMealFile')?.addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (file.size > 2000000) { feedback.textContent = 'File too large (maximum 2 MB).'; return; }
+      try {
+        const payload = JSON.parse(await file.text());
+        if (payload.type !== 'pulsefit:meal-data' || payload.version !== 1 ||
+            !payload.meals || typeof payload.meals !== 'object' || Array.isArray(payload.meals)) throw Error('Incorrect meal-plan file');
+        const imported = {};
+        for (const [date, entry] of Object.entries(payload.meals)) {
+          if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !entry || typeof entry !== 'object') continue;
+          imported[date] = {};
+          for (const [id] of types) if (typeof entry[id] === 'string') imported[date][id] = entry[id].slice(0,400);
+        }
+        meals = imported;
+        localStorage.setItem('pulsefit-imported-meals-v1',JSON.stringify(meals));
+        render();
+        feedback.textContent = 'Imported real meals for ' + Object.keys(meals).length + ' dates from Healthy Recipes.';
+      } catch (error) { feedback.textContent = 'Could not import meal file: ' + error.message; }
+      event.target.value = '';
     });
     dateInput.addEventListener('change', render);
     render();
