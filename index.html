@@ -96,6 +96,20 @@
             <div id="todaySessionList" class="session-list"></div>
           </section>
         </div>
+        <section class="surface" aria-labelledby="dailyMealsTitle" style="margin-top:24px;padding:clamp(16px,3vw,28px)">
+          <div class="card-title-row" style="gap:16px;flex-wrap:wrap;align-items:center">
+            <div>
+              <span class="section-label"><i class="ph ph-calendar-check"></i> DAILY EXERCISE + MEAL PLANNER</span>
+              <h2 id="dailyMealsTitle">Today's workouts &amp; meals</h2>
+              <p class="muted" style="margin:8px 0 0">Your PulseFit session is shown above. Review your scheduled breakfast, lunch, dinner and snacks from Healthy Recipes below.</p>
+            </div>
+            <a class="soft-button" href="https://healthy-recipes-murex.vercel.app/planner" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px">Open full meal planner <i class="ph ph-arrow-square-out"></i></a>
+          </div>
+          <div style="margin-top:18px;border:1px solid rgba(120,150,170,.22);border-radius:16px;overflow:hidden;background:#fff">
+            <iframe title="Healthy Recipes daily meal planner" src="https://healthy-recipes-murex.vercel.app/planner" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" style="display:block;width:100%;height:min(75vh,750px);min-height:470px;border:0;background:#fff"></iframe>
+          </div>
+          <p class="muted" style="font-size:13px;margin-top:12px">Meal plans stay managed in Healthy Recipes. If its embedded view is restricted by the source app, use “Open full meal planner” above.</p>
+        </section>
       </section>
 
       <section class="app-page" id="plan" data-page="plan">
