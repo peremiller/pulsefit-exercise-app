@@ -780,13 +780,7 @@ const enableInstallExperience = () => {
   $("#installAppButton").addEventListener("click", installPulseFit);
   updateInstallButton();
 
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
-        showToast("Offline setup will retry next time.");
-      });
-    });
-  }
+
 };
 
 const bindEvents = () => {
