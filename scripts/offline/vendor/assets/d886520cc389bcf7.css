@@ -1,0 +1,56 @@
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(ed335894f8d954263675.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(437dc9f921739a689312.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(68ed4be49ec7d32f07b4.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(ea1f264039fed13fd36e.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(a8291b05b2732801abdb.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(50357df108c5d297ec4e.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(32971ad7976930539a11.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(d9e0ddb4a15a0054ad84.ttf) format('truetype');
+}

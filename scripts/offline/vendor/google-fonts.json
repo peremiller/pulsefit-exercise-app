@@ -1,0 +1,25 @@
+{
+  "stylesheets": {
+    "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap": "d886520cc389bcf7.css"
+  },
+  "fonts": {
+    "https://fonts.gstatic.com/s/manrope/v23/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4aE-_F.ttf": "ea1f264039fed13fd36e.ttf",
+    "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_KUnNSg.ttf": "d9e0ddb4a15a0054ad84.ttf",
+    "https://fonts.gstatic.com/s/manrope/v23/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk7PFO_F.ttf": "437dc9f921739a689312.ttf",
+    "https://fonts.gstatic.com/s/manrope/v23/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4jE-_F.ttf": "68ed4be49ec7d32f07b4.ttf",
+    "https://fonts.gstatic.com/s/manrope/v23/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FO_F.ttf": "ed335894f8d954263675.ttf",
+    "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_TknNSg.ttf": "32971ad7976930539a11.ttf",
+    "https://fonts.gstatic.com/s/manrope/v23/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk59E-_F.ttf": "a8291b05b2732801abdb.ttf",
+    "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_d0nNSg.ttf": "50357df108c5d297ec4e.ttf"
+  },
+  "licenses": {
+    "Manrope": {
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
+      "file": "manrope-OFL.txt"
+    },
+    "Plus Jakarta Sans": {
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/plusjakartasans/OFL.txt",
+      "file": "plusjakartasans-OFL.txt"
+    }
+  }
+}
