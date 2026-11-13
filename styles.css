@@ -374,6 +374,7 @@ p { margin-top: 0; }
 }
 
 .split-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.split-layout > .surface { min-width: 0; }
 
 .surface {
   padding: 24px;
@@ -1480,3 +1481,10 @@ html :is(.tabs,.toolbar,.filter-bar,.filters,.actions,.button-row,.dialog-action
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; } }
 
 @media screen{html .exercise-card{border-radius:12px;box-shadow:none}html .challenge-card{border-radius:12px;box-shadow:none}html .detail-content p{line-height:1.75}html .exercise-dialog{border-radius:14px}html .app-page h1{letter-spacing:-.045em}}
+
+/* Make Progress milestones readable at 320px without expanding the page. */
+@media (max-width: 420px) {
+  .split-layout { grid-template-columns: minmax(0, 1fr); }
+  .badge-grid { grid-template-columns: minmax(0, 1fr); }
+  .milestone span { min-width: 0; overflow-wrap: anywhere; }
+}
