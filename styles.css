@@ -887,7 +887,7 @@ p { margin-top: 0; }
   z-index: 30;
   display: grid;
   width: min(880px, calc(100% - 24px));
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   margin: 0 auto;
   padding: 8px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -912,6 +912,8 @@ p { margin-top: 0; }
   font-weight: 800;
 }
 
+.nav-item { min-width: 0; }
+.nav-item span { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-item i { font-size: 21px; }
 
 .nav-item.is-active {
