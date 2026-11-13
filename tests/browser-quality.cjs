@@ -12,6 +12,8 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
         page.on("pageerror", e => errors.push(e.message));
         await page.goto(base + "/library", {waitUntil:"domcontentloaded"});
         await page.waitForSelector("#exerciseSearch");
+        await page.waitForTimeout(350);
+        if (errors.length) console.log("PAGE ERROR", width, colorScheme, errors);
         assert.equal(new URL(page.url()).pathname,"/library");
         assert.equal(await page.locator('[data-target="library"]').getAttribute("aria-current"),"page");
         await page.locator('[data-target="progress"]').click();
