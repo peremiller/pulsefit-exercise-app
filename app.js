@@ -729,7 +729,7 @@ const renderBadges = () => {
 const goPage = (target, updateHistory = true) => {
   const valid = ["today", "plan", "cardio", "body", "library", "progress", "gyms"].includes(target) ? target : "today";
   $$(".app-page").forEach((page) => page.classList.toggle("is-active", page.dataset.page === valid));
-  $(".nav-item").forEach((item) => {
+  $$(".nav-item").forEach((item) => {
     const current = item.dataset.target === valid;
     item.classList.toggle("is-active", current);
     if (current) item.setAttribute("aria-current", "page");
