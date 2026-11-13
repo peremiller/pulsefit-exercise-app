@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/gym-recommendations.css" />
 </head>
 <body>
+  <a class="skip-link" href="#mainContent">Skip to main content</a>
   <div class="app-shell">
     <header class="app-header">
       <div class="brand-lockup" aria-label="PulseFit home">
@@ -40,7 +41,7 @@
       </div>
     </header>
 
-    <main class="main-content">
+    <main class="main-content" id="mainContent" tabindex="-1">
       <section class="app-page is-active" id="today" data-page="today">
         <div class="page-heading today-heading">
           <div>
@@ -238,7 +239,7 @@
     </main>
 
     <nav class="bottom-nav" aria-label="Primary navigation">
-      <button class="nav-item is-active" type="button" data-target="today"><i class="ph ph-sun"></i><span>Today</span></button>
+      <button class="nav-item is-active" type="button" data-target="today" aria-current="page"><i class="ph ph-sun"></i><span>Today</span></button>
       <button class="nav-item" type="button" data-target="plan"><i class="ph ph-clipboard-text"></i><span>Plan</span></button>
       <button class="nav-item" type="button" data-target="cardio"><i class="ph ph-person-simple-run"></i><span>Cardio</span></button>
       <button class="nav-item" type="button" data-target="body"><i class="ph ph-barbell"></i><span>Body</span></button>
