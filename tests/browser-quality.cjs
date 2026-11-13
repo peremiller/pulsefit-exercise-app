@@ -26,6 +26,13 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
         assert.equal(await page.locator('[data-target="progress"]').getAttribute("aria-current"),"page");
         assert.equal(await page.locator(".skip-link").count(),1);
         const widthOk = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2);
+        if (!widthOk) {
+          const details = await page.evaluate(() => [...document.querySelectorAll("body *")].filter(el => {
+            const rect=el.getBoundingClientRect();
+            return rect.width>0 && (rect.right>innerWidth+2 || rect.left< -2);
+          }).slice(0,12).map(el => ({tag:el.tagName,cls:String(el.className).slice(0,70),right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)})));
+          console.log("OVERFLOW DETAILS",width,colorScheme,details);
+        }
         assert.equal(widthOk,true, "horizontal overflow "+width+" "+colorScheme);
         await page.evaluate(() => localStorage.setItem("pulsefit2","{invalid-backup"));
         await page.reload();
