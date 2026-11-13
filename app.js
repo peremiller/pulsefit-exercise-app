@@ -1,4 +1,5 @@
 import { gymDirectoryMarkup, mountGymDirectory } from './gym-recommendations.js';
+import { createSafeStorage } from './safe-storage.js';
 import { importBodyCardExercises, bodyCardExercise, BODY_CARD_WORKOUTS, BODY_CARD_SOURCE } from './body-card-import.js';
 
 const PLANS = [
@@ -261,14 +262,8 @@ const CHALLENGES = [
   },
 ];
 
-const safeRead = (key, fallback) => {
-  try {
-    const value = JSON.parse(localStorage.getItem(key));
-    return value ?? fallback;
-  } catch {
-    return fallback;
-  }
-};
+const browserStore = createSafeStorage(() => window.localStorage);
+const safeRead = (key, fallback) => browserStore.read(key, fallback);
 
 const state = {
   workouts: safeRead("pulsefit2", []),
@@ -284,7 +279,7 @@ const state = {
   guidedRemaining: 45,
   guidedRunning: false,
   guidedInterval: null,
-  completedMovements: Number(localStorage.getItem("pf_completed_movements") || 0),
+  completedMovements: safeRead("pf_completed_movements", 0),
 };
 
 const todayKey = () => new Date().toDateString();
@@ -293,15 +288,16 @@ if (state.water.d !== todayKey()) state.water = { d: todayKey(), ml: 0 };
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
-const saveState = () => {
-  localStorage.setItem("pulsefit2", JSON.stringify(state.workouts));
-  localStorage.setItem("pf_cardio", JSON.stringify(state.cardio));
-  localStorage.setItem("pf_body", JSON.stringify(state.body));
-  localStorage.setItem("pf_ch", JSON.stringify(state.challenges));
-  localStorage.setItem("pf_water", JSON.stringify(state.water));
-  localStorage.setItem("pf_favorites", JSON.stringify(state.favorites));
-  localStorage.setItem("pf_completed_movements", String(state.completedMovements));
-};
+const saveState = () => browserStore.saveMany({
+  pulsefit2: state.workouts,
+  pf_cardio: state.cardio,
+  pf_body: state.body,
+  pf_ch: state.challenges,
+  pf_water: state.water,
+  pf_favorites: state.favorites,
+  pf_completed_movements: state.completedMovements,
+});
+const storageWarning = "Change is visible here, but was not fully saved. Browser storage is unavailable or an existing record needs recovery.";
 
 const formatNumber = (value) => new Intl.NumberFormat().format(value);
 const formatDate = (timestamp) => new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(timestamp));
@@ -477,10 +473,10 @@ const renderChallenges = () => {
       const index = completed.indexOf(value);
       index >= 0 ? completed.splice(index, 1) : completed.push(value);
       state.challenges[challenge] = completed.sort((a, b) => a - b);
-      saveState();
+      const saved = saveState();
       renderChallenges();
       renderBadges();
-      showToast(index >= 0 ? `Day ${value} marked incomplete.` : `Day ${value} complete — strong work.`);
+      showToast(saved ? (index >= 0 ? `Day ${value} marked incomplete.` : `Day ${value} complete — strong work.`) : storageWarning);
     });
   });
 };
@@ -602,11 +598,11 @@ const toggleFavorite = () => {
   const index = state.favorites.indexOf(id);
   if (index >= 0) state.favorites.splice(index, 1);
   else state.favorites.push(id);
-  saveState();
+  const saved = saveState();
   const isSaved = state.favorites.includes(id);
   $("#favoriteExercise").classList.toggle("is-saved", isSaved);
   $("#favoriteExercise i").className = isSaved ? "ph-fill ph-bookmark-simple" : "ph ph-bookmark-simple";
-  showToast(isSaved ? "Saved to your home favorites." : "Removed from favorites.");
+  showToast(saved ? (isSaved ? "Saved to your home favorites." : "Removed from favorites.") : storageWarning);
 };
 
 const updateDuration = (delta) => {
@@ -663,10 +659,10 @@ const completeGuided = () => {
     vol: 0,
     muscles: [exercise.focus],
   });
-  saveState();
+  const saved = saveState();
   renderStats();
   renderProgress();
-  showToast(`${exercise.name} complete. Strong, controlled work.`);
+  showToast(saved ? `${exercise.name} complete. Strong, controlled work.` : storageWarning);
 };
 
 const renderCardio = () => {
@@ -733,7 +729,12 @@ const renderBadges = () => {
 const goPage = (target, updateHistory = true) => {
   const valid = ["today", "plan", "cardio", "body", "library", "progress", "gyms"].includes(target) ? target : "today";
   $$(".app-page").forEach((page) => page.classList.toggle("is-active", page.dataset.page === valid));
-  $$(".nav-item").forEach((item) => item.classList.toggle("is-active", item.dataset.target === valid));
+  $(".nav-item").forEach((item) => {
+    const current = item.dataset.target === valid;
+    item.classList.toggle("is-active", current);
+    if (current) item.setAttribute("aria-current", "page");
+    else item.removeAttribute("aria-current");
+  });
   if (updateHistory) history.pushState({ page: valid }, "", valid === "today" ? "/" : `/${valid}`);
   document.title = `${valid[0].toUpperCase() + valid.slice(1)} · PulseFit`;
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -790,10 +791,10 @@ const bindEvents = () => {
   $$("[data-water]").forEach((button) => {
     button.addEventListener("click", () => {
       state.water.ml += Number(button.dataset.water);
-      saveState();
+      const saved = saveState();
       renderWater();
       renderBadges();
-      showToast("Hydration updated.");
+      showToast(saved ? "Hydration updated." : storageWarning);
     });
   });
 
@@ -832,11 +833,11 @@ const bindEvents = () => {
     const km = Number($("#cardioKm").value);
     const min = Number($("#cardioMinutes").value);
     state.cardio.unshift({ type: $("#cardioType").value, km, min, date: Date.now() });
-    event.currentTarget.reset();
-    saveState();
+    const saved = saveState();
+    if (saved) event.currentTarget.reset();
     renderCardio();
     renderStats();
-    showToast("Cardio activity saved.");
+    showToast(saved ? "Cardio activity saved." : storageWarning);
   });
 
   $("#bodyForm").addEventListener("submit", (event) => {
@@ -848,10 +849,10 @@ const bindEvents = () => {
       h: Number($("#bodyHeight").value) || state.body[0]?.h || null,
       date: Date.now(),
     });
-    event.currentTarget.reset();
-    saveState();
+    const saved = saveState();
+    if (saved) event.currentTarget.reset();
     renderBody();
-    showToast("Body measurement saved.");
+    showToast(saved ? "Body measurement saved." : storageWarning);
   });
 };
 
@@ -872,7 +873,6 @@ const init = () => {
   bindEvents();
   enableInstallExperience();
   goPage(pathToPage(), false);
-  saveState();
 };
 
 init();
