@@ -1,0 +1,37 @@
+name: PulseFit Universal Quality
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-and-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked app dependencies
+        run: npm ci
+      - name: Validate storage preservation
+        run: node --test tests/safe-storage.test.mjs
+      - name: Existing offline regression suite
+        run: npm run test:offline
+      - name: Canonical Vite and offline build
+        run: npm run build
+      - name: Install isolated Chromium test tooling
+        run: |
+          npm install --no-save --package-lock=false playwright@1.57.0
+          npx playwright install --with-deps chromium
+      - name: Real browser routing, responsive and recovery checks
+        run: |
+          npm run dev -- --host 127.0.0.1 > /tmp/pulsefit-vite.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5173/library >/dev/null; then break; fi
+            sleep 1
+          done
+          node tests/browser-quality.cjs
