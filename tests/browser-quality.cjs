@@ -52,6 +52,13 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
             name: "meal-plan.json", mimeType: "application/json",
             buffer: Buffer.from(JSON.stringify(original))
           });
+          // The change handler awaits file.text(); wait for that async import to persist.
+          await page.waitForFunction(() => {
+            try {
+              return JSON.parse(localStorage.getItem("pulsefit-imported-meals-v1") || "null")
+                ?."2026-11-20"?.lunch === "Vegetables and rice";
+            } catch { return false; }
+          });
           const before = await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1"));
           assert.equal(JSON.parse(before)["2026-11-20"].lunch, "Vegetables and rice");
           await upload.setInputFiles({
@@ -61,6 +68,7 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
               meals: { "invalid-date": { lunch: "Unusable" }, "2026-11-21": {} }
             }))
           });
+          await page.waitForFunction(() => document.querySelector("#pulseMealSaved")?.textContent?.includes("not changed"));
           assert.equal(await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1")), before,
             "invalid/empty meal imports must not erase saved meals");
           assert.match(await page.locator("#pulseMealSaved").textContent(), /not changed/i);
