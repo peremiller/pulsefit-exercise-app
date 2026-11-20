@@ -56,7 +56,7 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
           await page.waitForFunction(() => {
             try {
               return JSON.parse(localStorage.getItem("pulsefit-imported-meals-v1") || "null")
-                ?."2026-11-20"?.lunch === "Vegetables and rice";
+                ?.["2026-11-20"]?.lunch === "Vegetables and rice";
             } catch { return false; }
           });
           const before = await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1"));
