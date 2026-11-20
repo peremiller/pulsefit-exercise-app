@@ -42,6 +42,29 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
         assert.equal(await page.evaluate(() => localStorage.getItem("pulsefit2")),"{invalid-backup");
         const toast = await page.locator("#toast").textContent();
         assert.match(toast, /not fully saved/i);
+        if (width === 390 && colorScheme === "light") {
+          const upload = page.locator("#pulseMealFile");
+          const original = {
+            type: "pulsefit:meal-data", version: 1,
+            meals: { "2026-11-20": { lunch: "Vegetables and rice" } }
+          };
+          await upload.setInputFiles({
+            name: "meal-plan.json", mimeType: "application/json",
+            buffer: Buffer.from(JSON.stringify(original))
+          });
+          const before = await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1"));
+          assert.equal(JSON.parse(before)["2026-11-20"].lunch, "Vegetables and rice");
+          await upload.setInputFiles({
+            name: "empty-export.json", mimeType: "application/json",
+            buffer: Buffer.from(JSON.stringify({
+              type: "pulsefit:meal-data", version: 1,
+              meals: { "invalid-date": { lunch: "Unusable" }, "2026-11-21": {} }
+            }))
+          });
+          assert.equal(await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1")), before,
+            "invalid/empty meal imports must not erase saved meals");
+          assert.match(await page.locator("#pulseMealSaved").textContent(), /not changed/i);
+        }
         assert.deepEqual(errors,[], "uncaught errors "+width+" "+colorScheme);
         await context.close();
         console.log("PASS viewport="+width+" theme="+colorScheme+" routes, history, preservation, status");
