@@ -17,12 +17,14 @@ function compatible(key, value, fallback) {
 
 export function createSafeStorage(getStorage) {
   const protectedKeys = new Set();
+  const observed = new Map(); // Last raw value read or successfully saved in this tab.
   let inaccessible = false;
   return {
     read(key, fallback) {
       let raw;
       try { raw = getStorage().getItem(key); }
       catch { inaccessible = true; return fallback; }
+      observed.set(key, raw);
       if (raw === null) return fallback;
       try {
         const parsed = JSON.parse(raw);
@@ -36,8 +38,20 @@ export function createSafeStorage(getStorage) {
       let allSaved = true;
       for (const [key, value] of Object.entries(entries)) {
         if (protectedKeys.has(key)) { allSaved = false; continue; }
-        try { getStorage().setItem(key, JSON.stringify(value)); }
-        catch { inaccessible = true; allSaved = false; }
+        try {
+          const storage = getStorage();
+          // Another tab may have modified this record after our initial read.
+          // Preserve its bytes instead of overwriting unseen newer work.
+          if (observed.has(key) && storage.getItem(key) !== observed.get(key)) {
+            protectedKeys.add(key);
+            allSaved = false;
+            continue;
+          }
+          const encoded = JSON.stringify(value);
+          if (typeof encoded !== "string") { allSaved = false; continue; }
+          storage.setItem(key, encoded);
+          observed.set(key, encoded);
+        } catch { inaccessible = true; allSaved = false; }
       }
       return allSaved;
     },
