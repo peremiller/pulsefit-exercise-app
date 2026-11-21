@@ -46,7 +46,7 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
           const upload = page.locator("#pulseMealFile");
           const original = {
             type: "pulsefit:meal-data", version: 1,
-            meals: { "2026-11-20": { lunch: "Vegetables and rice" } }
+            meals: { "2026-11-20": { lunch: "Vegetables and rice" }, "2028-02-29": { dinner: "Leap-day meal" } }
           };
           await upload.setInputFiles({
             name: "meal-plan.json", mimeType: "application/json",
@@ -61,6 +61,7 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
           });
           const before = await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1"));
           assert.equal(JSON.parse(before)["2026-11-20"].lunch, "Vegetables and rice");
+          assert.equal(JSON.parse(before)["2028-02-29"].dinner, "Leap-day meal", "real leap dates remain valid");
           await upload.setInputFiles({
             name: "empty-export.json", mimeType: "application/json",
             buffer: Buffer.from(JSON.stringify({
@@ -72,6 +73,22 @@ const base = process.env.PULSEFIT_TEST_URL || "http://127.0.0.1:5173";
           assert.equal(await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1")), before,
             "invalid/empty meal imports must not erase saved meals");
           assert.match(await page.locator("#pulseMealSaved").textContent(), /not changed/i);
+          // A syntactically valid but impossible date must not replace the existing plan.
+          await upload.setInputFiles({
+            name: "impossible-date.json", mimeType: "application/json",
+            buffer: Buffer.from(JSON.stringify({
+              type: "pulsefit:meal-data", version: 1,
+              meals: { "2026-02-30": { lunch: "Never existed" }, "2027-02-29": { lunch: "Not a leap year" } }
+            }))
+          });
+          await page.waitForFunction(() => document.querySelector("#pulseMealSaved")?.textContent?.includes("not changed"));
+          assert.equal(await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1")), before,
+            "impossible calendar dates must not erase previously saved valid meals");
+          // Failed JSON parsing must provide a safe error and retain the same saved meals.
+          await upload.setInputFiles({name:"broken.json",mimeType:"application/json",buffer:Buffer.from("{bad")});
+          await page.waitForFunction(() => document.querySelector("#pulseMealSaved")?.textContent?.includes("Could not import"));
+          assert.equal(await page.evaluate(() => localStorage.getItem("pulsefit-imported-meals-v1")), before);
+          assert.match(await page.locator("#pulseMealSaved").textContent(), /saved meal plan was not changed/i);
         }
         assert.deepEqual(errors,[], "uncaught errors "+width+" "+colorScheme);
         await context.close();
