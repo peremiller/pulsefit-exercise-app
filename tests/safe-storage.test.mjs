@@ -82,6 +82,31 @@ test("newer changes in another tab are protected while independent records still
   assert.equal(data.get("pf_favorites"),'["updated-in-other-tab"]');
 });
 
+test("unserializable progress does not permanently disable browser storage", () => {
+  const { io, data } = browserStore({ pf_cardio: "[]", pf_favorites: '["existing"]' });
+  const store = createSafeStorage(() => io);
+  store.read("pf_cardio", []);
+  store.read("pf_favorites", []);
+  const cycle = []; cycle.push(cycle);
+  assert.equal(store.saveMany({ pf_cardio: cycle, pf_favorites: ["existing", "new"] }), false);
+  assert.equal(store.inaccessible, false);
+  assert.equal(data.get("pf_cardio"), "[]");
+  assert.equal(data.get("pf_favorites"), '["existing","new"]');
+  assert.equal(store.saveMany({ pf_cardio: [{ type: "Walk" }] }), true);
+  assert.equal(data.get("pf_cardio"), '[{"type":"Walk"}]');
+});
+
+test("BigInt serialization errors do not erase the existing workout or other records", () => {
+  const { io, data } = browserStore({ pf_completed_movements: "3", pf_favorites: "[]" });
+  const store = createSafeStorage(() => io);
+  store.read("pf_completed_movements", 0);
+  store.read("pf_favorites", []);
+  assert.equal(store.saveMany({ pf_completed_movements: 4n, pf_favorites: ["saved"] }), false);
+  assert.equal(store.inaccessible, false);
+  assert.equal(data.get("pf_completed_movements"), "3");
+  assert.equal(data.get("pf_favorites"), '["saved"]');
+});
+
 test("successive saves from this tab update the concurrency baseline", () => {
   const {io,data}=browserStore();
   const store=createSafeStorage(()=>io);
