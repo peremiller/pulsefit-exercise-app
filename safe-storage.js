@@ -39,6 +39,12 @@ export function createSafeStorage(getStorage) {
       for (const [key, value] of Object.entries(entries)) {
         if (protectedKeys.has(key)) { allSaved = false; continue; }
         try {
+          // A circular object or BigInt is not a storage failure. Refuse only
+          // that value; keep the remaining independent progress saveable.
+          let encoded;
+          try { encoded = JSON.stringify(value); }
+          catch { allSaved = false; continue; }
+          if (typeof encoded !== "string") { allSaved = false; continue; }
           const storage = getStorage();
           // Another tab may have modified this record after our initial read.
           // Preserve its bytes instead of overwriting unseen newer work.
@@ -47,8 +53,6 @@ export function createSafeStorage(getStorage) {
             allSaved = false;
             continue;
           }
-          const encoded = JSON.stringify(value);
-          if (typeof encoded !== "string") { allSaved = false; continue; }
           storage.setItem(key, encoded);
           observed.set(key, encoded);
         } catch { inaccessible = true; allSaved = false; }
