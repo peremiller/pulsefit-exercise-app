@@ -116,3 +116,19 @@ test("successive saves from this tab update the concurrency baseline", () => {
   assert.equal(data.get("pf_favorites"),'["a","b"]');
   assert.equal(store.protectedKeys.size,0);
 });
+
+
+test("silently rejected storage write reports failure and retains the last confirmed baseline", () => {
+  const {io,data}=browserStore({pf_favorites:'["old"]',pf_cardio:"[]"});
+  const write=io.setItem;
+  let reject=true;
+  io.setItem=(key,value)=>{if (!(reject && key==="pf_favorites")) write(key,value);};
+  const store=createSafeStorage(()=>io);
+  store.read("pf_favorites",[]); store.read("pf_cardio",[]);
+  assert.equal(store.saveMany({pf_favorites:["new"],pf_cardio:[{type:"Walk"}]}),false);
+  assert.equal(data.get("pf_favorites"),'["old"]');
+  assert.equal(data.get("pf_cardio"),'[{"type":"Walk"}]');
+  reject=false;
+  assert.equal(store.saveMany({pf_favorites:["new"]}),true);
+  assert.equal(data.get("pf_favorites"),'["new"]');
+});
