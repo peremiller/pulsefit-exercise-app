@@ -54,6 +54,7 @@ export function createSafeStorage(getStorage) {
             continue;
           }
           storage.setItem(key, encoded);
+          if (storage.getItem(key) !== encoded) { allSaved = false; continue; }
           observed.set(key, encoded);
         } catch { inaccessible = true; allSaved = false; }
       }
