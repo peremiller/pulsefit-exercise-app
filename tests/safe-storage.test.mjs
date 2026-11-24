@@ -67,3 +67,68 @@ test("nullable and nonfinite counters are protected instead of propagating inval
   assert.equal(store.saveMany({pf_completed_movements:1}),false);
   assert.equal(data.get("pf_completed_movements"),"null");
 });
+
+test("newer changes in another tab are protected while independent records still save", () => {
+  const {io,data} = browserStore({pf_favorites:'["older"]',pf_cardio:"[]"});
+  const store=createSafeStorage(()=>io);
+  assert.deepEqual(store.read("pf_favorites",[]),["older"]);
+  assert.deepEqual(store.read("pf_cardio",[]),[]);
+  data.set("pf_favorites",'["updated-in-other-tab"]');
+  assert.equal(store.saveMany({pf_favorites:["older","new"],pf_cardio:[{type:"Walk"}]}),false);
+  assert.equal(data.get("pf_favorites"),'["updated-in-other-tab"]');
+  assert.equal(data.get("pf_cardio"),'[{"type":"Walk"}]');
+  assert.equal(store.protectedKeys.has("pf_favorites"),true);
+  assert.equal(store.saveMany({pf_favorites:[],pf_cardio:[]}),false);
+  assert.equal(data.get("pf_favorites"),'["updated-in-other-tab"]');
+});
+
+test("unserializable progress does not permanently disable browser storage", () => {
+  const { io, data } = browserStore({ pf_cardio: "[]", pf_favorites: '["existing"]' });
+  const store = createSafeStorage(() => io);
+  store.read("pf_cardio", []);
+  store.read("pf_favorites", []);
+  const cycle = []; cycle.push(cycle);
+  assert.equal(store.saveMany({ pf_cardio: cycle, pf_favorites: ["existing", "new"] }), false);
+  assert.equal(store.inaccessible, false);
+  assert.equal(data.get("pf_cardio"), "[]");
+  assert.equal(data.get("pf_favorites"), '["existing","new"]');
+  assert.equal(store.saveMany({ pf_cardio: [{ type: "Walk" }] }), true);
+  assert.equal(data.get("pf_cardio"), '[{"type":"Walk"}]');
+});
+
+test("BigInt serialization errors do not erase the existing workout or other records", () => {
+  const { io, data } = browserStore({ pf_completed_movements: "3", pf_favorites: "[]" });
+  const store = createSafeStorage(() => io);
+  store.read("pf_completed_movements", 0);
+  store.read("pf_favorites", []);
+  assert.equal(store.saveMany({ pf_completed_movements: 4n, pf_favorites: ["saved"] }), false);
+  assert.equal(store.inaccessible, false);
+  assert.equal(data.get("pf_completed_movements"), "3");
+  assert.equal(data.get("pf_favorites"), '["saved"]');
+});
+
+test("successive saves from this tab update the concurrency baseline", () => {
+  const {io,data}=browserStore();
+  const store=createSafeStorage(()=>io);
+  store.read("pf_favorites",[]);
+  assert.equal(store.saveMany({pf_favorites:["a"]}),true);
+  assert.equal(store.saveMany({pf_favorites:["a","b"]}),true);
+  assert.equal(data.get("pf_favorites"),'["a","b"]');
+  assert.equal(store.protectedKeys.size,0);
+});
+
+
+test("silently rejected storage write reports failure and retains the last confirmed baseline", () => {
+  const {io,data}=browserStore({pf_favorites:'["old"]',pf_cardio:"[]"});
+  const write=io.setItem;
+  let reject=true;
+  io.setItem=(key,value)=>{if (!(reject && key==="pf_favorites")) write(key,value);};
+  const store=createSafeStorage(()=>io);
+  store.read("pf_favorites",[]); store.read("pf_cardio",[]);
+  assert.equal(store.saveMany({pf_favorites:["new"],pf_cardio:[{type:"Walk"}]}),false);
+  assert.equal(data.get("pf_favorites"),'["old"]');
+  assert.equal(data.get("pf_cardio"),'[{"type":"Walk"}]');
+  reject=false;
+  assert.equal(store.saveMany({pf_favorites:["new"]}),true);
+  assert.equal(data.get("pf_favorites"),'["new"]');
+});
